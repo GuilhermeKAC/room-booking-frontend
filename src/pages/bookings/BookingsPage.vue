@@ -4,6 +4,7 @@ import bookingService from '../../services/bookingService'
 
 const bookings = ref([])
 const loading = ref(false)
+const cancelError = ref(null)
 
 async function fetchBookings() {
   loading.value = true
@@ -18,12 +19,19 @@ async function fetchBookings() {
 }
 
 async function cancelBooking(id) {
-  if (!confirm('Tem certeza que deseja cancelar esta reserva?')) return
+  cancelError.value = null
   try {
     await bookingService.cancel(id)
     fetchBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Erro ao cancelar reserva.')
+    const status = err.response?.status
+    if (status === 400) {
+      cancelError.value = 'Esta reserva não pode ser cancelada com menos de 2 horas de antecedência.'
+    } else if (status === 403) {
+      cancelError.value = 'Você não tem permissão para cancelar esta reserva.'
+    } else {
+      cancelError.value = 'Não foi possível cancelar a reserva. Tente novamente.'
+    }
   }
 }
 
@@ -52,6 +60,11 @@ onMounted(fetchBookings)
 <template>
   <div>
     <h4 class="fw-bold mb-4">Minhas Reservas</h4>
+
+    <div v-if="cancelError" class="alert alert-warning d-flex align-items-center mb-4">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      {{ cancelError }}
+    </div>
 
     <div v-if="loading" class="text-center py-5">
       <div class="spinner-border text-primary"></div>
