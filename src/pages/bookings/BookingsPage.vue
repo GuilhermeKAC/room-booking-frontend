@@ -29,11 +29,11 @@ async function cancelBooking(id) {
 
 function formatDateTime(isoString) {
   return new Date(isoString).toLocaleString('pt-BR', {
-    day: '2d-digit',
-    month: '2d-digit',
+    day: '2-digit',
+    month: '2-digit',
     year: 'numeric',
-    hour: '2d-digit',
-    minute: '2d-digit'
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
